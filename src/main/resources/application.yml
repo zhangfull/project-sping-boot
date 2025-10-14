@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: my-springboot-project
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/my_database
+    username: root
+    password: 123456
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.catalogue.my_spring_boot_project.modules.common.entity
+
+file:
+  pagination:
+    page-size: 20
+  img:
+    avatarPath: E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/avatars/
+    introduceImgs: E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/introduceImgs/
