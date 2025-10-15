@@ -8,12 +8,14 @@ public final class SecurityWhitelist {
     /** 放行的 URL 列表（不需要登录验证） */
     public static final String[] PUBLIC_URLS = {
             "/login/register",
+            "/fileCategory/getAll",
             "/login/refresh",
             "/login/active",
             "/login/test",
             "/login/initialize",
             "/file/getFiles",
             "/file/getCategory",
-            "/user/getAvatarBase64"
+            "/user/getAvatarBase64",
+            "file/download"
     };
 }

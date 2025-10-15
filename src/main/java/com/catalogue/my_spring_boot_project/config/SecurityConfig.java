@@ -65,7 +65,6 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
             throws Exception {
-
         CustomAuthenticationFilter cFilter = new CustomAuthenticationFilter(authenticationManager);
         cFilter.setFilterProcessesUrl("/login/active");
         cFilter.setAllowSessionCreation(false);

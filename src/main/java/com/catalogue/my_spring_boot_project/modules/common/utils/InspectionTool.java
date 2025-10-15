@@ -7,6 +7,6 @@ public class InspectionTool {
     }
 
     public static boolean numberIsEmpty(Number number) {
-        return number == null || number.longValue() == 0;
+        return number == null || number.longValue() < 0;
     }
 }

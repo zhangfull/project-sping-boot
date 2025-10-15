@@ -5,10 +5,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.catalogue.my_spring_boot_project.modules.common.entity.CategoryEntity;
 import com.catalogue.my_spring_boot_project.modules.common.entity.FileEntity;
+import com.catalogue.my_spring_boot_project.modules.common.utils.FileUtils;
+import com.catalogue.my_spring_boot_project.modules.common.utils.ImgUtils;
 import com.catalogue.my_spring_boot_project.modules.common.utils.InspectionTool;
 import com.catalogue.my_spring_boot_project.modules.common.utils.Log;
 import com.catalogue.my_spring_boot_project.modules.common.utils.ThreadLocalUtil;
@@ -19,7 +23,7 @@ import com.catalogue.my_spring_boot_project.modules.file_module.mapper.FileMappe
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileRequestDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileUploadFormDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.ListItemVO;
-import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.UploadUrlsVO;
+import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.UploadPathsVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.service.FileService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -33,10 +37,17 @@ public class FileServiceImpl implements FileService {
 
     private final FileMapper fileMapper;
     private final CategoryMapper categoryMapper;
+    private final ImgUtils imgUtils;
+    private final FileUtils fileUtils;
 
-    public FileServiceImpl(FileMapper fileMapper, CategoryMapper categoryMapper) {
+    public FileServiceImpl(FileMapper fileMapper,
+            CategoryMapper categoryMapper,
+            ImgUtils imgUtils,
+            FileUtils fileUtils) {
         this.fileMapper = fileMapper;
         this.categoryMapper = categoryMapper;
+        this.imgUtils = imgUtils;
+        this.fileUtils = fileUtils;
     }
 
     @Override
@@ -54,7 +65,7 @@ public class FileServiceImpl implements FileService {
             }
 
             if (!(dto.getFilters().getCategoryCode() == null
-                    || dto.getFilters().getCategoryCode() == 0)) {
+                    || dto.getFilters().getCategoryCode() < 0)) {
                 queryWrapper.eq("file_category_id", dto.getFilters().getCategoryCode());
             }
 
@@ -132,7 +143,7 @@ public class FileServiceImpl implements FileService {
     private String INTRODUCEIMGS;
 
     @Override
-    public Result<UploadUrlsVO> uploadForm(FileUploadFormDTO dto) {
+    public Result<UploadPathsVO> uploadForm(FileUploadFormDTO dto) {
         if (InspectionTool.stringIsEmpty(dto.getFileName()) &&
                 InspectionTool.numberIsEmpty(dto.getCategoryCode()) &&
                 InspectionTool.stringIsEmpty(dto.getSize()) &&
@@ -149,14 +160,14 @@ public class FileServiceImpl implements FileService {
         file.setDescription(dto.getDescription());
         file.setUploadDate(LocalDateTime.now());
         file.setCollectionCount(0L);
-        fileMapper.insert(file);
+        // fileMapper.insert(file);
 
-        UploadUrlsVO uploadUrlsVO = new UploadUrlsVO();
-        uploadUrlsVO.setFileUrl(FILEPATH + "file" + file.getId());
-        uploadUrlsVO.setImgsUrl(INTRODUCEIMGS + "introduceImgs" + file.getId());
+        UploadPathsVO uploadUrlsVO = new UploadPathsVO();
+        uploadUrlsVO.setFilePath(FILEPATH + "file" + file.getId());
+        uploadUrlsVO.setImgsPath(INTRODUCEIMGS + "introduceImgs" + file.getId());
         try {
-            File path1 = new File(uploadUrlsVO.getFileUrl());
-            File path2 = new File(uploadUrlsVO.getImgsUrl());
+            File path1 = new File(uploadUrlsVO.getFilePath());
+            File path2 = new File(uploadUrlsVO.getImgsPath());
             if (!path1.exists()) {
                 path1.mkdirs();
             }
@@ -169,5 +180,23 @@ public class FileServiceImpl implements FileService {
         }
         return Result.success(uploadUrlsVO);
     }
+
+    @Override
+    public Result<String> uploadChunk(String uploadUrl, Integer chunkIndex, Integer chunkTotal,
+            MultipartFile chunkBLOB) {
+        if (InspectionTool.stringIsEmpty(uploadUrl) ||
+                InspectionTool.numberIsEmpty(chunkIndex) ||
+                InspectionTool.numberIsEmpty(chunkTotal) ||
+                chunkBLOB == null) {
+            return Result.error(-1, "参数验证失败");
+        }
+        File file = new File(uploadUrl, "file.part" + chunkIndex);
+        boolean saveFile = fileUtils.saveFile(file.toString(), chunkBLOB);
+        if (!saveFile) {
+            return Result.error(-2, "文件保存失败");
+        }
+        return Result.success();
+    }
+
 
 }

@@ -55,7 +55,7 @@ public class UserController {
 
     @PostMapping("/getAvatarBase64")
     public Result<String> getAvatarBase64(@RequestBody Map<String, String> body) {
-        return imgUtils.getImg(body.get("url"));
+        return userService.getAvatar(body.get("url"));
     }
 
     @Value("${file.img.avatarPath}")

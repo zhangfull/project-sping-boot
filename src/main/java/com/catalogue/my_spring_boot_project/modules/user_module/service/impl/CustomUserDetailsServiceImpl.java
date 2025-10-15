@@ -43,7 +43,6 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
                 : List.of(new SimpleGrantedAuthority("ROLE_USER"));
         Log.info(getClass(), "用户：[" + username + "]的权限是：{}", roles.toString());
-        Log.info(getClass(), "将用户id添加到ThreadLocal");
         ThreadLocalUtil.set(user.getId());
         CustomUserDetail customUserDetail = new CustomUserDetail();
         customUserDetail.setId(user.getId());
@@ -55,7 +54,6 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         } else {
             customUserDetail.setAvatarUrl(user.getAvatarUrl());
         }
-        Log.info(getClass(), "用户：[" + username + "]的头像是：{}", user.getAvatarUrl());
         customUserDetail.setPassword(user.getPassword());
         customUserDetail.setAuthorities(roles);
         return customUserDetail;

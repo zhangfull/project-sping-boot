@@ -1,5 +1,7 @@
 package com.catalogue.my_spring_boot_project.modules.user_module.service.impl;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +23,6 @@ import com.catalogue.my_spring_boot_project.modules.user_module.pojo.vo.LoginVO;
 import com.catalogue.my_spring_boot_project.modules.user_module.service.UserService;
 import com.catalogue.my_spring_boot_project.modules.user_module.utils.GeneratingUtils;
 import com.catalogue.my_spring_boot_project.modules.user_module.utils.JwtUtil;
-import com.catalogue.my_spring_boot_project.modules.user_module.utils.PasswordUtil;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -125,16 +126,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Result<String> getAvatar(String url) {
+        Result<String> result = imgUtils.getImg(url);
+        if (result.getCode() != 0) {
+            Log.info(getClass(), "获取用户头像失败");
+            Path path = Paths.get(AVATARPATH, "default.bin");
+            return imgUtils.getImg("webp|" + path.toString());
+        } else {
+            return result;
+        }
+    }
+
+    @Override
     public Result<String> uploadAvatar(MultipartFile file) {
         UserEntity user = userMapper.selectById(ThreadLocalUtil.getLongId());
         if (user == null) {
             return Result.error(-1, "用户不存在");
         }
-        String path = AVATARPATH + user.getUid() + ".txt";
-        if (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty()) {
-            user.setAvatarUrl(path);
-            userMapper.updateById(user);
+        String path = AVATARPATH + user.getUid() + ".bin";
+
+        String originalFilename = file.getOriginalFilename(); // e.g. "picture.png"
+        String suffix = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+        } else {
+            suffix = "png";
         }
+
+        user.setAvatarUrl(suffix + "|" + path);
+        userMapper.updateById(user);
+        Log.info(getClass(), "上传用户头像成功:{}", user.getAvatarUrl());
         return imgUtils.uploadImg(file, path);
     }
 

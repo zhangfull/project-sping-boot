@@ -42,6 +42,14 @@ public interface UserService {
     Result<UserEntity> getUserInfo();
 
     /**
+     * 获取头像
+     * 
+     * @param url 头像地址
+     * @return 头像Base64
+     */
+    Result<String> getAvatar(String url);
+
+    /**
      * 上传头像
      * 
      * @param file 头像文件
