@@ -10,7 +10,6 @@ import com.catalogue.my_spring_boot_project.modules.user_module.pojo.vo.LoginVO;
 
 public interface UserService {
 
-   
     /**
      * 注册
      * 
@@ -35,14 +34,16 @@ public interface UserService {
      */
     Result<LoginVO> refreshLogin(String refreshToken);
 
-     /**
+    /**
      * 获取用户信息
+     * 
      * @return 用户信息
      */
     Result<UserEntity> getUserInfo();
 
     /**
      * 上传头像
+     * 
      * @param file 头像文件
      * @return 上传结果
      */
@@ -50,6 +51,7 @@ public interface UserService {
 
     /**
      * 更新用户信息
+     * 
      * @param dto 用户信息
      * @return 更新结果
      */
@@ -57,6 +59,7 @@ public interface UserService {
 
     /**
      * 更新密码
+     * 
      * @param dto 更新密码信息
      * @return 更新结果
      */

@@ -165,7 +165,7 @@ public class UserServiceImpl implements UserService {
         if (!pe.matches(dto.getOldPassword(), user.getPassword())) {
             return Result.error(-2, "旧密码错误");
         }
-        
+
         user.setPassword(pe.encode(dto.getNewPassword()));
         userMapper.updateById(user);
         return Result.success();

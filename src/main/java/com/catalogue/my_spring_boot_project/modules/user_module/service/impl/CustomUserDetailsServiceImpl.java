@@ -36,6 +36,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         Log.info(getClass(), "用户：[" + username + "]正在登录");
         UserEntity user = userMapper.selectUserWithRoles(username);
         if (user == null) {
+            Log.info(getClass(), "用户：[" + username + "]不存在");
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
         List<GrantedAuthority> roles = user.getRoles() != null ? user.getRoles().stream()

@@ -30,6 +30,8 @@ import com.catalogue.my_spring_boot_project.security.verification.CustomAuthenti
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import static com.catalogue.my_spring_boot_project.config.constant.SecurityWhitelist.PUBLIC_URLS;
+
 
 @Configuration
 @EnableWebSecurity
@@ -51,17 +53,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // 用 BCrypt 加密
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
+    SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
             throws Exception {
 
         CustomAuthenticationFilter cFilter = new CustomAuthenticationFilter(authenticationManager);
@@ -100,19 +102,13 @@ public class SecurityConfig {
                 .authenticationManager(authenticationManager)
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/login/register",
-                                "/login/refresh",
-                                "/file/getFiles",
-                                "/file/getCategory",
-                                "/user/getAvatarBase64")
-                        .permitAll()
+                        .requestMatchers(PUBLIC_URLS).permitAll()
                         .requestMatchers("/user/test").hasRole("ADMIN")
                         .requestMatchers("/user/**").authenticated()
                         .anyRequest().authenticated())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilter(cFilter)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

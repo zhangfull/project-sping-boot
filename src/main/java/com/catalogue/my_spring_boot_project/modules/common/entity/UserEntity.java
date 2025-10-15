@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import lombok.Data;
@@ -12,6 +14,7 @@ import lombok.Data;
 @Data
 @TableName("user")
 public class UserEntity {
+    @TableId(type = IdType.AUTO)
     private Long id;
     private String uid;
     private String name;

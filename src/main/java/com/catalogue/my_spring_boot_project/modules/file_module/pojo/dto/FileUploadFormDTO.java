@@ -9,6 +9,6 @@ public class FileUploadFormDTO {
     private String fileName;
     private String size;
     private String description;
-    private boolean introduce;
+    private String introduce;
     private boolean display;
 }

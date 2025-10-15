@@ -1,5 +1,7 @@
 package com.catalogue.my_spring_boot_project.modules.file_module.service.impl;
 
+import java.io.File;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +11,7 @@ import com.catalogue.my_spring_boot_project.modules.common.entity.CategoryEntity
 import com.catalogue.my_spring_boot_project.modules.common.entity.FileEntity;
 import com.catalogue.my_spring_boot_project.modules.common.utils.InspectionTool;
 import com.catalogue.my_spring_boot_project.modules.common.utils.Log;
+import com.catalogue.my_spring_boot_project.modules.common.utils.ThreadLocalUtil;
 import com.catalogue.my_spring_boot_project.modules.common.vo.FilePage;
 import com.catalogue.my_spring_boot_project.modules.common.vo.Result;
 import com.catalogue.my_spring_boot_project.modules.file_module.mapper.CategoryMapper;
@@ -17,7 +20,6 @@ import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileReq
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileUploadFormDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.ListItemVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.UploadUrlsVO;
-import com.catalogue.my_spring_boot_project.modules.file_module.service.CategoryService;
 import com.catalogue.my_spring_boot_project.modules.file_module.service.FileService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -123,16 +125,49 @@ public class FileServiceImpl implements FileService {
         throw new UnsupportedOperationException("Unimplemented method 'getDetail'");
     }
 
+    @Value("${file.files.path}")
+    private String FILEPATH;
+
+    @Value("${file.img.introduceImgs}")
+    private String INTRODUCEIMGS;
+
     @Override
     public Result<UploadUrlsVO> uploadForm(FileUploadFormDTO dto) {
         if (InspectionTool.stringIsEmpty(dto.getFileName()) &&
                 InspectionTool.numberIsEmpty(dto.getCategoryCode()) &&
                 InspectionTool.stringIsEmpty(dto.getSize()) &&
                 InspectionTool.stringIsEmpty(dto.getHeadline())) {
-            return null;
+            return Result.error(-1, "参数验证失败");
         }
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'uploadForm'");
+
+        FileEntity file = new FileEntity();
+        file.setFileName(dto.getFileName());
+        file.setUploaderId(ThreadLocalUtil.getLongId());
+        file.setFileCategoryId(dto.getCategoryCode());
+        file.setSize(dto.getSize());
+        file.setHeadline(dto.getHeadline());
+        file.setDescription(dto.getDescription());
+        file.setUploadDate(LocalDateTime.now());
+        file.setCollectionCount(0L);
+        fileMapper.insert(file);
+
+        UploadUrlsVO uploadUrlsVO = new UploadUrlsVO();
+        uploadUrlsVO.setFileUrl(FILEPATH + "file" + file.getId());
+        uploadUrlsVO.setImgsUrl(INTRODUCEIMGS + "introduceImgs" + file.getId());
+        try {
+            File path1 = new File(uploadUrlsVO.getFileUrl());
+            File path2 = new File(uploadUrlsVO.getImgsUrl());
+            if (!path1.exists()) {
+                path1.mkdirs();
+            }
+            if (!path2.exists()) {
+                path2.mkdirs();
+            }
+        } catch (Exception e) {
+            Log.error(getClass(), "创建文件夹失败", e);
+            return Result.error(-2, "创建文件夹失败");
+        }
+        return Result.success(uploadUrlsVO);
     }
 
 }

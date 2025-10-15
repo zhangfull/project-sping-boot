@@ -17,6 +17,8 @@ mybatis-plus:
 file:
   pagination:
     page-size: 20
+  files:
+    path: E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/files/
   img:
     avatarPath: E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/avatars/
     introduceImgs: E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/introduceImgs/

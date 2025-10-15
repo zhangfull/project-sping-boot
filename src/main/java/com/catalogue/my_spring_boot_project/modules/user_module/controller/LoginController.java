@@ -15,6 +15,8 @@ import com.catalogue.my_spring_boot_project.modules.user_module.pojo.dto.Registe
 import com.catalogue.my_spring_boot_project.modules.user_module.pojo.vo.LoginVO;
 import com.catalogue.my_spring_boot_project.modules.user_module.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/login")
 public class LoginController {
@@ -39,13 +41,28 @@ public class LoginController {
         return userService.register(dto.getUsername(), dto.getEmail(), dto.getPassword());
     }
 
-    @PostMapping("/refresh")
-    public Result<LoginVO> postMethodName(
+    @PostMapping("/initialize")
+    public Result<LoginVO> initializeToken(
             @CookieValue(value = "refresh_token", required = false) String refreshToken) {
         if (refreshToken == null) {
             return Result.error(-1, "token无效");
         }
         return userService.refreshLogin(refreshToken);
     }
+
+    @PostMapping("/refresh")
+    public Result<LoginVO> refreshToken(HttpServletRequest request) {
+        String refreshToken = request.getHeader("Authorization");
+        if (refreshToken == null) {
+            return Result.error(-1, "token无效");
+        }
+        return userService.refreshLogin(refreshToken);
+    }
+
+    @PostMapping("/test")
+    public void postMethodName() {
+        Log.info(getClass(), "test");
+    }
+    
 
 }

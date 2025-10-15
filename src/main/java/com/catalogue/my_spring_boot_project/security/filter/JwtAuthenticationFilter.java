@@ -15,6 +15,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import static com.catalogue.my_spring_boot_project.config.constant.SecurityWhitelist.PUBLIC_URLS;
+
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -27,11 +29,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-
     @SuppressWarnings("null")
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        Log.info(getClass(), "验证身份：jwt验证");
+        String path = request.getRequestURI();
+
+        // ✅ 定义白名单路径
+        if (isPublicPath(path)) {
+            filterChain.doFilter(request, response);
+            Log.info(getClass(), "请求路径属于白名单：{}，跳过JWT验证", request.getRequestURI());
+            return; // 直接跳过，不执行JWT验证
+        }
+
         String header = request.getHeader("Authorization");
         if (header != null) {
             String emailOrUid = jwtUtil.parseToken(header);
@@ -51,6 +62,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         Log.info(getClass(), "请求路径：{}", request.getRequestURI());
         filterChain.doFilter(request, response);
+    }
+
+    // ✅ 定义白名单路径
+    private boolean isPublicPath(String path) {
+        for (String publicPath : PUBLIC_URLS) {
+            if (path.equals(publicPath)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
