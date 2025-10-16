@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.catalogue.my_spring_boot_project.modules.common.entity.CategoryEntity;
 import com.catalogue.my_spring_boot_project.modules.common.entity.FileEntity;
 import com.catalogue.my_spring_boot_project.modules.common.entity.ImgInfoEntity;
+import com.catalogue.my_spring_boot_project.modules.common.entity.UserEntity;
 import com.catalogue.my_spring_boot_project.modules.common.utils.FileUtils;
 import com.catalogue.my_spring_boot_project.modules.common.utils.ImgUtils;
 import com.catalogue.my_spring_boot_project.modules.common.utils.InspectionTool;
@@ -29,9 +30,11 @@ import com.catalogue.my_spring_boot_project.modules.file_module.mapper.ImgMapper
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileRequestDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileUploadFormDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.ValidateFormDTO;
+import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.FileDetailVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.ListItemVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.UploadPathsVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.service.FileService;
+import com.catalogue.my_spring_boot_project.modules.user_module.mapper.UserMapper;
 
 import org.springframework.beans.factory.annotation.Value;
 
@@ -47,17 +50,20 @@ public class FileServiceImpl implements FileService {
     private final ImgUtils imgUtils;
     private final FileUtils fileUtils;
     private final ImgMapper imgMapper;
+    private final UserMapper userMapper;
 
     public FileServiceImpl(FileMapper fileMapper,
             CategoryMapper categoryMapper,
             ImgUtils imgUtils,
             FileUtils fileUtils,
-            ImgMapper imgMapper) {
+            ImgMapper imgMapper,
+            UserMapper userMapper) {
         this.fileMapper = fileMapper;
         this.categoryMapper = categoryMapper;
         this.imgUtils = imgUtils;
         this.fileUtils = fileUtils;
         this.imgMapper = imgMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -116,6 +122,9 @@ public class FileServiceImpl implements FileService {
         List<CategoryEntity> categories = categoryMapper.selectList(queryWrapper);
         List<ListItemVO> displayFiles = selectPage.getRecords().stream().map(f -> {
             ListItemVO listItemVO = new ListItemVO(f);
+            if (listItemVO.getDescription().length() > 30) {
+                listItemVO.setDescription(listItemVO.getDescription().substring(0, 30) + "...");
+            }
             listItemVO.setCategory(
                     categories.stream()
                             .filter(c -> c.getId().equals(f.getFileCategoryId()))
@@ -141,9 +150,31 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Result<String> getDetail(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDetail'");
+    public Result<FileDetailVO> getDetail(Long id) {
+        FileEntity selectById = fileMapper.selectById(id);
+        if (selectById == null) {
+            return Result.error(-1, "文件不存在");
+        }
+        FileDetailVO fileDetailVO = new FileDetailVO(selectById);
+        QueryWrapper<ImgInfoEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("file_id", id);
+        List<ImgInfoEntity> imgs = imgMapper.selectList(queryWrapper);
+
+        String[] imgsBase64 = new String[imgs.size()];
+        for (ImgInfoEntity img : imgs) {
+            imgsBase64[imgs.indexOf(img)] = imgUtils.getImg(img.getImgPath()).getData();
+        }
+        fileDetailVO.setImgsBase64(imgsBase64);
+
+        fileDetailVO.setCategory(categoryMapper.selectById(selectById.getFileCategoryId()).getCategoryName());
+
+        QueryWrapper <UserEntity> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.select("name");
+        userQueryWrapper.eq("id", selectById.getUploaderId());
+        UserEntity user = userMapper.selectOne(userQueryWrapper);
+        fileDetailVO.setUploader(user.getName());
+
+        return Result.success(fileDetailVO);
     }
 
     @Value("${file.files.path}")

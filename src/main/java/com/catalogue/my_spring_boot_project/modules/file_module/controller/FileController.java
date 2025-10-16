@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-
+import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.FileDetailVO;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +41,14 @@ public class FileController {
     public Result<FilePage<ListItemVO>> getFiles(@RequestBody FileRequestDTO dto) {
         Log.info(getClass(), "获取文件列表条件：{}", dto.toString());
         return fileService.getFileList(dto);
+    }
+
+    @PostMapping("/getDetail")
+    public Result<FileDetailVO> getDetail(@RequestBody Map<String, Object> body) {
+        Long id = Long.valueOf(body.get("id").toString());
+
+        Log.info(getClass(), "获取文件详情：{}", id);
+        return fileService.getDetail(id);
     }
 
     @PostMapping("/uploadForm")

@@ -10,6 +10,7 @@ import com.catalogue.my_spring_boot_project.modules.common.vo.Result;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileRequestDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileUploadFormDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.ValidateFormDTO;
+import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.FileDetailVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.ListItemVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.UploadPathsVO;
 
@@ -37,7 +38,7 @@ public interface FileService {
      * @param id
      * @return
      */
-    Result<String> getDetail(Long id);
+    Result<FileDetailVO> getDetail(Long id);
 
     /**
      * 上传文件
@@ -84,7 +85,6 @@ public interface FileService {
      * @return
      */
     Result<String> deleteFile(Path path);
-
 
     /**
      * 删除垃圾文件
