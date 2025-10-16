@@ -9,18 +9,17 @@ import com.catalogue.my_spring_boot_project.modules.common.vo.FilePage;
 import com.catalogue.my_spring_boot_project.modules.common.vo.Result;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileRequestDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileUploadFormDTO;
+import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.ValidateFormDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.ListItemVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.UploadPathsVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.service.FileService;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.GetMapping;
-
 
 @RestController
 @RequestMapping("/file")
@@ -55,35 +54,27 @@ public class FileController {
             @RequestPart("chunkBLOB") MultipartFile chunkBLOB) {
         Log.info(getClass(), "上传文件分片:{}/{}", chunkIndex, chunkTotal - 1);
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (chunkTotal > 125) {
+            return Result.error(-1, "分片过多");
         }
-
         return fileService.uploadChunk(uploadUrl, chunkIndex, chunkTotal, chunkBLOB);
     }
 
-    @PostMapping("/mergeChunks")
-    public Result<String> mergeChunks(@RequestBody Map<String, Object> data) {
+    @PostMapping("/uploadImgs")
+    public Result<String> uploadImgs(@RequestPart("filePath") String path,
+            @RequestPart("imgs") MultipartFile[] files) {
+        return fileService.uploadImgs(path, files);
+    }
 
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        String fileNameString = data.get("fileName").toString();
-        Integer totalNumber = Integer.getInteger(data.get("totalNumber").toString());
-        String path = data.get("path").toString();
-        Log.info(getClass(), "合并文件分片:{},{},{}", fileNameString, totalNumber, path);
-        return Result.success();
+    @PostMapping("/validate")
+    public Result<String> validate(@RequestBody ValidateFormDTO dto) {
+        return fileService.validate(dto);
     }
 
     @GetMapping("/download")
     public void getMethodName(HttpServletResponse response) {
-        fileUtils.downloadFile("E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/files/filenull","1.21.8-Fabric 0.17.2.zip",response);
+        fileUtils.downloadFile("E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/files/filenull",
+                "1.21.8-Fabric 0.17.2.zip", response);
     }
-    
 
 }

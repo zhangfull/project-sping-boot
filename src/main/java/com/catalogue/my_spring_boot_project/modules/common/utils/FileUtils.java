@@ -74,4 +74,9 @@ public class FileUtils {
             Log.error(getClass(), "合并下载文件失败", e);
         }
     }
+
+    public int getFileCount(String path,String nameType) {
+        File[] files = new File(path).listFiles((dir, name) -> name.startsWith(nameType));
+        return files == null ? 0 : files.length;
+    }
 }

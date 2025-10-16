@@ -3,6 +3,8 @@ package com.catalogue.my_spring_boot_project.modules.file_module.service.impl;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +24,7 @@ import com.catalogue.my_spring_boot_project.modules.file_module.mapper.CategoryM
 import com.catalogue.my_spring_boot_project.modules.file_module.mapper.FileMapper;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileRequestDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileUploadFormDTO;
+import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.ValidateFormDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.ListItemVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.vo.UploadPathsVO;
 import com.catalogue.my_spring_boot_project.modules.file_module.service.FileService;
@@ -157,10 +160,16 @@ public class FileServiceImpl implements FileService {
         file.setFileCategoryId(dto.getCategoryCode());
         file.setSize(dto.getSize());
         file.setHeadline(dto.getHeadline());
+        file.setIntroduce(dto.getIntroduce());
         file.setDescription(dto.getDescription());
         file.setUploadDate(LocalDateTime.now());
         file.setCollectionCount(0L);
         // fileMapper.insert(file);
+        file.setId(111l);
+
+        if (file.getId() == null) {
+            return Result.error(-2, "文件上传失败");
+        }
 
         UploadPathsVO uploadUrlsVO = new UploadPathsVO();
         uploadUrlsVO.setFilePath(FILEPATH + "file" + file.getId());
@@ -198,5 +207,28 @@ public class FileServiceImpl implements FileService {
         return Result.success();
     }
 
+    @Override
+    public Result<String> uploadImgs(String path, MultipartFile[] files) {
+        int count = 0;
+        for (MultipartFile file : files) {
+            File f = new File(path, "img" + ".bin" + count);
+            Result<String> uploadImg = imgUtils.uploadImg(file, f.toString());
+            if (uploadImg.getCode() != 0) {
+                Log.info(getClass(), "上传图片失败:{}", f.toString());
+            }
+            count++;
+        }
+        return Result.success();
+    }
+
+    @Override
+    public Result<String> validate(ValidateFormDTO dto) {
+        int fileCount = fileUtils.getFileCount(dto.getFilePath(), "file.part");
+        int imgCount = fileUtils.getFileCount(dto.getImgsPath(), "img.bin");
+        if (fileCount == dto.getTotalNumber() && imgCount == dto.getTotalImgs()) {
+            return Result.success();
+        }
+        return Result.error(-1, "文件校验失败");
+    }
 
 }
