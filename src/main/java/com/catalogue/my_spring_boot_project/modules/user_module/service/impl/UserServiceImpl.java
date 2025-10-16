@@ -144,16 +144,10 @@ public class UserServiceImpl implements UserService {
             return Result.error(-1, "用户不存在");
         }
         String path = AVATARPATH + user.getUid() + ".bin";
-
         String originalFilename = file.getOriginalFilename(); // e.g. "picture.png"
-        String suffix = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
-        } else {
-            suffix = "png";
-        }
+        String suffix = imgUtils.getImgsDataPath(originalFilename);
 
-        user.setAvatarUrl(suffix + "|" + path);
+        user.setAvatarUrl(suffix + path);
         userMapper.updateById(user);
         Log.info(getClass(), "上传用户头像成功:{}", user.getAvatarUrl());
         return imgUtils.uploadImg(file, path);

@@ -1,5 +1,6 @@
 package com.catalogue.my_spring_boot_project.modules.file_module.service;
 
+import java.nio.file.Path;
 import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -64,7 +65,7 @@ public interface FileService {
      * @param files
      * @return
      */
-    Result<String> uploadImgs(String path, MultipartFile[] files);
+    Result<String> uploadImgs(String path, MultipartFile[] files, Long id);
 
     /**
      * 检查文件完整性
@@ -75,5 +76,22 @@ public interface FileService {
      * @return
      */
     Result<String> validate(ValidateFormDTO dto);
+
+    /**
+     * 删除文件
+     * 
+     * @param path
+     * @return
+     */
+    Result<String> deleteFile(Path path);
+
+
+    /**
+     * 删除垃圾文件
+     * 
+     * @param body
+     * @return
+     */
+    Result<String> deleteGarbage(Long id);
 
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class UploadPathsVO {
+    private Long id;
     private String filePath;
     private String imgsPath;
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class ValidateFormDTO {
+    private Long id;
     private String filePath;
     private String imgsPath;
     private Integer totalNumber;

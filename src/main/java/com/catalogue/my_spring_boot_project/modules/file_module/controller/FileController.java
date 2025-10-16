@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
@@ -61,14 +64,19 @@ public class FileController {
     }
 
     @PostMapping("/uploadImgs")
-    public Result<String> uploadImgs(@RequestPart("filePath") String path,
-            @RequestPart("imgs") MultipartFile[] files) {
-        return fileService.uploadImgs(path, files);
+    public Result<String> uploadImgs(@RequestParam("filePath") String path,
+            @RequestPart("imgs") MultipartFile[] files, @RequestParam("id") Long id) {
+        return fileService.uploadImgs(path, files, id);
     }
 
     @PostMapping("/validate")
     public Result<String> validate(@RequestBody ValidateFormDTO dto) {
         return fileService.validate(dto);
+    }
+
+    @PostMapping("/deleteGarbage")
+    public Result<String> deleteGarbage(@RequestBody Map<String, String> body) {
+        return fileService.deleteGarbage(Long.parseLong(body.get("id")));
     }
 
     @GetMapping("/download")

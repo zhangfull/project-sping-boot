@@ -96,4 +96,14 @@ public class ImgUtils {
         }
         return Result.success();
     }
+
+    public String getImgsDataPath(String originalFilename) { // 获取文件后缀
+        String prefix = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            prefix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+        } else {
+            prefix = "png";
+        }
+        return prefix + "|";
+    }
 }
