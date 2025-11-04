@@ -18,5 +18,6 @@ public final class SecurityWhitelist {
             "/user/getAvatarBase64",
             "file/download",
             "file/getDetail",
+            "uploader/getHistory"
     };
 }

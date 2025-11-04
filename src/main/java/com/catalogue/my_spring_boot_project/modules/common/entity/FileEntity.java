@@ -5,9 +5,12 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 @TableName("file_info")
 public class FileEntity {
     @TableId(type = IdType.AUTO)

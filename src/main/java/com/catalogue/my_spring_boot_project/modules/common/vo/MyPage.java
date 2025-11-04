@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class FilePage<T> {
+public class MyPage<T> {
     Long currentPage;
     Long totalPages;
     Integer pageSize;

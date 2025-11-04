@@ -20,7 +20,7 @@ public class FileDetailVO {
     private String collectionCount;
     private String filePath;
     private String introduce;
-    private String[] imgsBase64;
+    private String[] imgs;
 
     /**
      * 没有 上传者名，图片，标签

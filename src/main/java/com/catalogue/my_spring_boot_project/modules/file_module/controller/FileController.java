@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.catalogue.my_spring_boot_project.modules.common.utils.FileUtils;
 import com.catalogue.my_spring_boot_project.modules.common.utils.Log;
-import com.catalogue.my_spring_boot_project.modules.common.vo.FilePage;
+import com.catalogue.my_spring_boot_project.modules.common.vo.MyPage;
 import com.catalogue.my_spring_boot_project.modules.common.vo.Result;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileRequestDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileUploadFormDTO;
@@ -38,7 +38,7 @@ public class FileController {
     }
 
     @PostMapping("/getFiles")
-    public Result<FilePage<ListItemVO>> getFiles(@RequestBody FileRequestDTO dto) {
+    public Result<MyPage<ListItemVO>> getFiles(@RequestBody FileRequestDTO dto) {
         Log.info(getClass(), "获取文件列表条件：{}", dto.toString());
         return fileService.getFileList(dto);
     }

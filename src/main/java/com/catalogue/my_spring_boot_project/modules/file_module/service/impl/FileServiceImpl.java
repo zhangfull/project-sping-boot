@@ -22,7 +22,7 @@ import com.catalogue.my_spring_boot_project.modules.common.utils.ImgUtils;
 import com.catalogue.my_spring_boot_project.modules.common.utils.InspectionTool;
 import com.catalogue.my_spring_boot_project.modules.common.utils.Log;
 import com.catalogue.my_spring_boot_project.modules.common.utils.ThreadLocalUtil;
-import com.catalogue.my_spring_boot_project.modules.common.vo.FilePage;
+import com.catalogue.my_spring_boot_project.modules.common.vo.MyPage;
 import com.catalogue.my_spring_boot_project.modules.common.vo.Result;
 import com.catalogue.my_spring_boot_project.modules.file_module.mapper.CategoryMapper;
 import com.catalogue.my_spring_boot_project.modules.file_module.mapper.FileMapper;
@@ -67,7 +67,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Result<FilePage<ListItemVO>> getFileList(FileRequestDTO dto) {
+    public Result<MyPage<ListItemVO>> getFileList(FileRequestDTO dto) {
         Page<FileEntity> p = new Page<>(dto.getNeedPage(), defaultPageSize);
         Page<FileEntity> selectPage;
         if (!dto.getIsFiltered()) {
@@ -81,7 +81,7 @@ public class FileServiceImpl implements FileService {
             }
 
             if (!(dto.getFilters().getCategoryCode() == null
-                    || dto.getFilters().getCategoryCode() < 0)) {
+                    || !(dto.getFilters().getCategoryCode() < 0))) {
                 queryWrapper.eq("file_category_id", dto.getFilters().getCategoryCode());
             }
 
@@ -99,6 +99,7 @@ public class FileServiceImpl implements FileService {
                         queryWrapper.orderByDesc("upload_date");
                         break;
                     case "uploadDateAsc":
+                        Log.info(getClass(), "uploadDateAsc");
                         queryWrapper.orderByAsc("upload_date");
                         break;
                     case "collectionCountDesc":
@@ -111,6 +112,7 @@ public class FileServiceImpl implements FileService {
                         break;
                 }
             }
+            Log.info(getClass(), "执行的SQL语句：{}", queryWrapper.getSqlSegment());
             selectPage = fileMapper.selectPage(p, queryWrapper);
         }
         if (selectPage.getRecords() == null || selectPage.getRecords().isEmpty()) {
@@ -134,7 +136,7 @@ public class FileServiceImpl implements FileService {
 
             return listItemVO;
         }).toList();
-        FilePage<ListItemVO> filePage = new FilePage<>();
+        MyPage<ListItemVO> filePage = new MyPage<>();
         filePage.setResults(displayFiles);
         filePage.setCurrentPage(dto.getNeedPage());
         filePage.setTotalPages(selectPage.getPages());
@@ -160,15 +162,15 @@ public class FileServiceImpl implements FileService {
         queryWrapper.eq("file_id", id);
         List<ImgInfoEntity> imgs = imgMapper.selectList(queryWrapper);
 
-        String[] imgsBase64 = new String[imgs.size()];
+        String[] imgsList = new String[imgs.size()];
         for (ImgInfoEntity img : imgs) {
-            imgsBase64[imgs.indexOf(img)] = imgUtils.getImg(img.getImgPath()).getData();
+            imgsList[imgs.indexOf(img)] = img.getImgPath();
         }
-        fileDetailVO.setImgsBase64(imgsBase64);
+        fileDetailVO.setImgs(imgsList);
 
         fileDetailVO.setCategory(categoryMapper.selectById(selectById.getFileCategoryId()).getCategoryName());
 
-        QueryWrapper <UserEntity> userQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<UserEntity> userQueryWrapper = new QueryWrapper<>();
         userQueryWrapper.select("name");
         userQueryWrapper.eq("id", selectById.getUploaderId());
         UserEntity user = userMapper.selectOne(userQueryWrapper);
@@ -192,16 +194,17 @@ public class FileServiceImpl implements FileService {
             return Result.error(-1, "参数验证失败");
         }
 
-        FileEntity file = new FileEntity();
-        file.setFileName(dto.getFileName());
-        file.setUploaderId(ThreadLocalUtil.getLongId());
-        file.setFileCategoryId(dto.getCategoryCode());
-        file.setSize(dto.getSize());
-        file.setHeadline(dto.getHeadline());
-        file.setIntroduce(dto.getIntroduce());
-        file.setDescription(dto.getDescription());
-        file.setUploadDate(LocalDateTime.now());
-        file.setCollectionCount(0L);
+        FileEntity file = FileEntity.builder()
+                .fileName(dto.getFileName())
+                .uploaderId(ThreadLocalUtil.getLongId())
+                .fileCategoryId(dto.getCategoryCode())
+                .size(dto.getSize())
+                .headline(dto.getHeadline())
+                .introduce(dto.getIntroduce())
+                .description(dto.getDescription())
+                .uploadDate(LocalDateTime.now())
+                .collectionCount(0L)
+                .build();
         fileMapper.insert(file);
 
         if (file.getId() == null) {

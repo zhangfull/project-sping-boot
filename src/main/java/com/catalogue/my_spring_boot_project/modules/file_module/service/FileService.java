@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.catalogue.my_spring_boot_project.modules.common.vo.FilePage;
+import com.catalogue.my_spring_boot_project.modules.common.vo.MyPage;
 import com.catalogue.my_spring_boot_project.modules.common.vo.Result;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileRequestDTO;
 import com.catalogue.my_spring_boot_project.modules.file_module.pojo.dto.FileUploadFormDTO;
@@ -22,7 +22,7 @@ public interface FileService {
      * @param dto
      * @return
      */
-    Result<FilePage<ListItemVO>> getFileList(FileRequestDTO dto);
+    Result<MyPage<ListItemVO>> getFileList(FileRequestDTO dto);
 
     /**
      * 更新文件版本

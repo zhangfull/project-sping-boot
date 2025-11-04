@@ -28,3 +28,7 @@ file:
   img:
     avatarPath: E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/avatars/
     introduceImgs: E:/VSCodeWarehouse/JavaProjects/my-spring-boot-project/warehouse/introduceImgs/
+
+cors:
+  allowed-origins: http://localhost:5173
+
